@@ -77,3 +77,18 @@ void BlockDeque<T>::push_front(T &item) {
     std::lock_guard<std::mutex> locker(mutex_);
     return deq_.push_front(item);
 }
+
+template<class T>
+bool BlockDeque<T>::pop(T &item) {
+    std::unique_lock<std::mutex> locker(mutex_);
+    while (deq_.empty()) {
+        cond_consumer_.wait(locker);
+        if (is_closed_) {
+            return false;
+        }
+    }
+    item = deq_.front();
+    deq_.pop_front();
+    cond_producer_.notify_one();
+    return true;
+}

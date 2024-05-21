@@ -85,9 +85,14 @@ public:
     */
     void push_front(T &item);
 
-    void pop(T &item);
+    /**
+     * pop the front item and store its value to item
+     * @param item where the popped item to be stored
+     * @return whether the pop successed
+    */
+    bool pop(T &item);
 
-    void pop(T &item, int timeout);
+    bool pop(T &item, int timeout);
 
     void flush();
 
