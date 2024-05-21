@@ -10,6 +10,9 @@
 
 class Buffer {
 public:
+    /**
+     * @param init_buffer_size the initial size of the buffer
+    */
     Buffer(int init_buffer_size = 1024);
 
     size_t WritableBytes() const;
@@ -34,12 +37,27 @@ public:
     void Append(const void *data, size_t len);
     void Append(const Buffer &buffer);
 
+    /**
+     * define a temporary buffer
+     * @param fd the file descriptor from which data is to be read
+     * @param errno a pointer to an integer where the error code will be saved 
+     *              if any error occurs
+     * @return the number of bytes actually read. return -1 if any error occurs
+    */
     ssize_t ReadFd(int fd, int *errno);
+
+    /**
+     * @param fd the file descriptor from which data is to be written
+     * @param errno a pointer to an integer where the error code will be saved
+     *              if any error occurs
+     * @return the number of bytes actually written. return -1 if any error occurs
+    */
     ssize_t WriteFd(int fd, int *errno);
 
 private:
     char * BeginPtr();
     const char * BeginPtr() const;
+    void MakeSapce(size_t len);
     
     std::vector<char> buffer_;
     std::atomic<std::size_t> read_pos_;
