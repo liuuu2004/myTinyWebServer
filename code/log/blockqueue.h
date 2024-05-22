@@ -92,8 +92,19 @@ public:
     */
     bool pop(T &item);
 
+    /**
+     * pop the front item and store its value to item, if didnot response in a specified
+     * time, return false.
+     @param item where the popped item to be stored
+     @param timeout after this time without popping, return false
+     @param whether the pop successed on time
+    */
     bool pop(T &item, int timeout);
 
+    /**
+     * signal a waiting consumer that there might be new data availiable or it should check the
+     * state of the deque
+    */
     void flush();
 
 private:

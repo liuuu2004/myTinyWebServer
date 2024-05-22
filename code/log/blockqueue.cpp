@@ -1,5 +1,7 @@
 #include "blockqueue.h"
 #include <cassert>
+#include <chrono>
+#include <condition_variable>
 #include <mutex>
 
 template<class T>
@@ -91,4 +93,27 @@ bool BlockDeque<T>::pop(T &item) {
     deq_.pop_front();
     cond_producer_.notify_one();
     return true;
+}
+
+template<class T>
+bool BlockDeque<T>::pop(T &item, int timeout) {
+    std::unique_lock<std::mutex> locker(mutex_);
+    while (deq_.empty()) {
+        if (cond_consumer_.wait_for(locker, std::chrono::seconds(timeout))
+                == std::cv_status::timeout) {
+            return false;
+        }
+        if (is_closed_) {
+            return false;
+        }
+    }
+    item = deq_.front();
+    deq_.pop_front();
+    cond_producer_.notify_one();
+    return true;
+}
+
+template<class T>
+void BlockDeque<T>::flush() {
+    cond_consumer_.notify_one();
 }
