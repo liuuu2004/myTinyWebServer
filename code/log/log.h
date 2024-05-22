@@ -114,5 +114,19 @@ private:
     std::mutex mutex_;
 };
 
+#define LOG_BASE(level, format, ...) \
+    do { \
+        Log *log = Log::instance();\
+        if (log->is_open_ && log->GetLevel() <= level) { \
+            log->write(level, format, ##__VA_ARGS__); \
+            log->flush(); \
+        } \
+    } while (0);
+
+#define LOG_DEBUG(format, ...) do {LOG_BASE(DEBUG, format, ##__VA_ARGS__)} while (0);
+#define LOG_INFO(format, ...) do {LOG_BASE(INFO, format, ##__VA_ARGS__)} while (0);
+#define LOG_WARN(format, ...) do {LOG_BASE(WARN, format, ##__VA_ARGS__)} while (0);
+#define LOG_ERROR(format, ...) do {LOG_BASE(ERROR, format, ##__VA_ARGS__)} while (0);
+
 
 #endif

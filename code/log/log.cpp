@@ -173,4 +173,29 @@ void Log::write(int level, const char *format, ...) {
         fp_ = fopen(new_file, "a");
         assert(fp_ != nullptr);
     }
+
+    {
+        std::unique_lock<std::mutex> locker(mutex_);
+        line_count_++;
+        int n = snprintf(buffer_.BeginWrite(), 128, "%d-%02d-%02d %02d:%02d:%02d.%06ld ",
+                         t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
+                         t.tm_hour, t.tm_min, t.tm_sec, now.tv_usec);
+        buffer_.HasWritten(n);
+        AppendLogLevelTitle(level);
+
+        va_start(vl, format);
+        int m = vsnprintf(buffer_.BeginWrite(), buffer_.WritableBytes(), format, vl);
+        va_end(vl);
+
+        buffer_.HasWritten(m);
+        buffer_.Append("\n\0", 2);
+
+        if (is_async_ && deque_ != nullptr && !deque_->full()) {
+            std::string s = buffer_.RetrieveAllToString();
+            deque_->push_back(s);
+        } else {
+            fputs(buffer_.Peek(), fp_);
+        }
+        buffer_.RetrieveAll();
+    }
 }

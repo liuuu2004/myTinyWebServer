@@ -39,6 +39,7 @@ void Buffer::RetrieveUntil(const char *end) {
 
 void Buffer::RetrieveAll() {
     memset(&buffer_[0], 0, buffer_.size());
+    // bzero(&buffer_[0], buffer_.size());
     read_pos_ = 0;
     write_pos_ = 0;
 }
