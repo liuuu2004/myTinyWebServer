@@ -31,14 +31,36 @@ public:
         clear();
     }
 
+    /**
+     * adjust the expiration time of a TimerNode with a specified id
+     * @param id id of the TimerNode that is going to be adjusted
+     * @param new_expires the new timeout duration in ms, to be added to the current
+     *                    time to set the new expiration time
+    */
     void adjust(int id, int new_expires);
 
+    /**
+     * add a new TimerNode or update an exsiting TimerNode in the heap
+     * @param id the id of the TimerNode
+     * @param time_out the timeout duration in ms
+     * @param tcb the call-back function to be called when the timer expires
+    */
     void add(int id, int time_out, const TimeoutCallBack &tcb);
 
+    /**
+     * delete TimerNode with specified id and call call-back function
+     * @param id id of the TimerNode which is going to be deleted
+    */
     void do_work(int id);
 
+    /**
+     * clear ref_ and heap_
+    */
     void clear();
 
+    /**
+     * clear time-out TimerNodes
+    */
     void tick();
 
     void pop();
@@ -51,7 +73,7 @@ private:
      * last element and adjust the heap
      * @param i index of the TimerNode to be deleted
     */
-    void del_(size_t i);
+    void del(size_t i);
 
     /**
      * move the TimerNode at index i up to the heap to maintain the min-heap
@@ -62,7 +84,7 @@ private:
     /** 
      * move the TimerNode at index i down to maintain the min-heap
      * @param i the index of the TimerNode to be moved down
-     * @param n TODO
+     * @param n the number of TimerNodes should be considered in the shift down
     */
     bool shift_down_(size_t i, size_t n);
 
