@@ -8,6 +8,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <utility>
 
 class ThreadPool {
 public:
@@ -49,6 +50,26 @@ public:
            }).detach();
         }
     }
+
+    ~ThreadPool() {
+        if (static_cast<bool>(pool_)) {
+            {
+                std::lock_guard<std::mutex> locker(pool_->mutex_);
+                pool_->is_closed_ = true;
+            }
+            pool_->cond_.notify_all();
+        }
+    }
+
+    template<class F>
+    void AddTask(F &&task) {
+        {
+            std::lock_guard<std::mutex> locker(pool_->mutex_);
+            pool_->tasks_.emplace(std::forward<F>(task));
+        }
+        pool_->cond_.notify_one();
+    }
+
 private:
     struct Pool {
         std::mutex mutex_;
