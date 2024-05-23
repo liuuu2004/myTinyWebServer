@@ -1,6 +1,8 @@
 #include "sqlconnpool.h"
 #include <cassert>
+#include <mutex>
 #include <mysql/mysql.h>
+#include <mysql/mysql/client_plugin.h>
 #include <semaphore.h>
 
 SqlConnPool::SqlConnPool() {
@@ -35,4 +37,19 @@ void SqlConnPool::init(const char *host, int port, const char *user,
     }
     MAX_CONN_ = conn_size;
     sem_init(&sem_id_, 0, MAX_CONN_);
+}
+
+MYSQL *SqlConnPool::get_conn() {
+    MYSQL *sql = nullptr;
+    if (conn_queue_.empty()) {
+        LOG_WARN("SQL Connection Pool Busy!");
+        return nullptr;
+    }
+    sem_wait(&sem_id_);
+    {
+        std::lock_guard<std::mutex> locker(mutex_);
+        sql = conn_queue_.front();
+        conn_queue_.pop();
+    }
+    return sql;
 }

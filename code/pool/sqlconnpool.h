@@ -14,6 +14,11 @@ public:
      * @return a sql connect pool instance
     */
     static SqlConnPool *instance();
+
+    /**
+     * add a sql connection to connect queue
+     * @return sql connection
+    */
     MYSQL *get_conn();
     void free_conn();
     int get_free_conn_count();
