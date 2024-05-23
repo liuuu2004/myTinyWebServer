@@ -1,5 +1,5 @@
-#ifndef THREADPOOL
-#define THREADPOOL
+#ifndef THREADPOOL_H
+#define THREADPOOL_H
 
 #include <cassert>
 #include <condition_variable>
