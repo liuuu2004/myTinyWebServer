@@ -68,7 +68,7 @@ public:
      * check whether the log is open
      * @return whether the og is open
     */
-    bool IsOpen();
+    bool IsOpen() {return is_open_; };
 
 private:
     /**
@@ -117,16 +117,16 @@ private:
 #define LOG_BASE(level, format, ...) \
     do { \
         Log *log = Log::instance();\
-        if (log->is_open_ && log->GetLevel() <= level) { \
+        if (log->IsOpen() && log->GetLevel() <= level) { \
             log->write(level, format, ##__VA_ARGS__); \
             log->flush(); \
         } \
     } while (0);
 
-#define LOG_DEBUG(format, ...) do {LOG_BASE(DEBUG, format, ##__VA_ARGS__)} while (0);
-#define LOG_INFO(format, ...) do {LOG_BASE(INFO, format, ##__VA_ARGS__)} while (0);
-#define LOG_WARN(format, ...) do {LOG_BASE(WARN, format, ##__VA_ARGS__)} while (0);
-#define LOG_ERROR(format, ...) do {LOG_BASE(ERROR, format, ##__VA_ARGS__)} while (0);
+#define LOG_DEBUG(format, ...) do {LOG_BASE(Log::LogLevel::DEBUG, format, ##__VA_ARGS__)} while (0);
+#define LOG_INFO(format, ...) do {LOG_BASE(Log::LogLevel::INFO, format, ##__VA_ARGS__)} while (0);
+#define LOG_WARN(format, ...) do {LOG_BASE(Log::LogLevel::WARN, format, ##__VA_ARGS__)} while (0);
+#define LOG_ERROR(format, ...) do {LOG_BASE(Log::LogLevel::ERROR, format, ##__VA_ARGS__)} while (0);
 
 
 #endif
