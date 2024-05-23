@@ -113,3 +113,17 @@ void HeapTimer::tick() {
         pop();
     }
 }
+
+void HeapTimer::pop() {
+    assert(!heap_.empty());
+    del(0);
+}
+
+int HeapTimer::GetNextTick() {
+    tick();
+    size_t du = -1;
+    if (!heap_.empty()) {
+        du = std::chrono::duration_cast<MS>(heap_.front().expires - Clock::now()).count();
+    }
+    return du;
+}

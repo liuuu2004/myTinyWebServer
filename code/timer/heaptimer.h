@@ -63,8 +63,16 @@ public:
     */
     void tick();
 
+    /**
+     * pop the top TimerNode
+    */
     void pop();
 
+    /**
+     * get the duration time in ms until the next timer events shall expire
+     * @return if no next timer, return -1, else return the duration time in
+     *         ms until the next timer events shall expire
+    */
     int GetNextTick();
 
 private:
