@@ -1,3 +1,7 @@
+/**
+ *  needs a introduction to sem_t...
+*/
+
 #ifndef SQLCONNPOOL_H
 #define SQLCONNPOOL_H
 
@@ -20,7 +24,16 @@ public:
      * @return sql connection
     */
     MYSQL *get_conn();
-    void free_conn();
+
+    /**
+     * free a specific sql connection in the connection queue
+    */
+    void free_conn(MYSQL *sql);
+
+    /**
+     * get the number of free connections
+     * @return number of free connection
+    */
     int get_free_conn_count();
 
     /**
@@ -35,6 +48,10 @@ public:
     */
     void init(const char *host, int port, const char *user,
               const char *pwd, const char *db_name, int conn_size = 10);
+    
+    /**
+     * pop all elements in the connction queue and close mysql
+    */
     void close_pool();
 
 private:
@@ -47,6 +64,7 @@ private:
 
     std::queue<MYSQL *> conn_queue_;
     std::mutex mutex_;
+
     sem_t sem_id_;
 };
 

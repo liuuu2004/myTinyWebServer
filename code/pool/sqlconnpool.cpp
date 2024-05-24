@@ -53,3 +53,25 @@ MYSQL *SqlConnPool::get_conn() {
     }
     return sql;
 }
+
+void SqlConnPool::free_conn(MYSQL *sql) {
+    assert(sql != nullptr);
+    std::lock_guard<std::mutex> locker(mutex_);
+    conn_queue_.push(sql);
+    sem_post(&sem_id_);
+}
+
+int SqlConnPool::get_free_conn_count() {
+    std::lock_guard<std::mutex> locker(mutex_);
+    return conn_queue_.size();
+}
+
+void SqlConnPool::close_pool() {
+    std::lock_guard<std::mutex> locker(mutex_);
+    while (!conn_queue_.empty()) {
+        auto item = conn_queue_.front();
+        conn_queue_.pop();
+        mysql_close(item);
+    }
+    mysql_library_end();
+}
