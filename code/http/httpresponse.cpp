@@ -63,3 +63,4 @@ void HttpResponse::init(const std::string &src_dir, std::string &path, bool is_k
     mm_file_ = nullptr;
     mm_file_stat_ = {0};
 }
+
