@@ -18,10 +18,10 @@ public:
             conn_pool_->free_conn(sql_);
         }
     }
+    
 private:
     MYSQL *sql_;
     SqlConnPool *conn_pool_;
 };
-
 
 #endif
