@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "../buffer/buffer.h"
+
 class HttpRequest {
 public:
     enum PARSE_STATE_ {
@@ -32,6 +34,21 @@ public:
     ~HttpRequest();
 
     void init();
+
+    bool parse(Buffer &buffer);
+
+    std::string path() const;
+    
+    std::string &path();
+
+    std::string method() const;
+
+    std::string version() const;
+
+    std::string get_post(const std::string &key) const;
+    std::string get_post(const char *key) const;
+
+    bool is_keep_alive() const;
 
 private:
     bool parse_request_line(const std::string &line);
