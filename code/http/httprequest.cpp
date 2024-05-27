@@ -1,4 +1,5 @@
 #include "httprequest.h"
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <mysql/mysql.h>
@@ -192,4 +193,94 @@ int HttpRequest::conver_hex(char ch) {
         return ch - 'a' + 10;
     }
     return ch;
+}
+
+bool HttpRequest::is_keep_alive() const {
+    if (header_.count("Connection") == 1) {
+        return header_.find("Connection")->second == "keep-alive" && version_ == "1.1";
+    }
+    return false;
+}
+
+void HttpRequest::init() {
+    method_ = path_ = version_ = body_ = "";
+    state_ = REQUEST_LINE;
+    header_.clear();
+    post_.clear();
+}
+
+bool HttpRequest::parse(Buffer &buffer) {
+    // this is used to indicate the end of a line in HTTP
+    const char CRLF[] = "\r\n";
+    if (buffer.ReadableBytes() <= 0) {
+        return false;
+    }
+    
+    /**
+     * find th end of the current line using the search function to locate the CRLF sequencce
+     * and extract the current line from the buffer into a string
+    */
+    while (buffer.ReadableBytes() != 0 && state_ != FINISH) {
+        const char *line_end = std::search(buffer.Peek(), buffer.BeginWriteConst(),
+            CRLF, CRLF + 2);
+        std::string line(buffer.Peek(), line_end);
+
+        switch (state_) {
+            case REQUEST_LINE:
+                if (!parse_request_line(line)) {
+                    return false;
+                }
+                parse_path();
+                break;
+            case HEADERS:
+                parse_header(line);
+                if (buffer.ReadableBytes() <= 2) {
+                    state_ = FINISH;
+                }
+                break;
+            case BODY:
+                parse_body(line);
+                break;
+            default:
+                break;
+        }
+        if (line_end == buffer.BeginWrite()) {
+            break;
+        }
+        buffer.RetrieveUntil(line_end + 2);
+    }
+    LOG_DEBUG("[%s], [%s], [%s]", method_.c_str(), path_.c_str(), version_.c_str());
+    return true;
+}
+
+std::string HttpRequest::path() const{
+    return path_;
+}
+
+std::string & HttpRequest::path() {
+    return path_;
+}
+
+std::string HttpRequest::method() const {
+    return method_;
+}
+
+std::string HttpRequest::version() const {
+    return version_;
+}
+
+std::string HttpRequest::get_post(const std::string &key) const {
+    assert(key != "");
+    if (post_.count(key) == 1) {
+        return post_.find(key)->second;
+    }
+    return "";
+}
+
+std::string HttpRequest::get_post(const char *key) const {
+    assert(key != nullptr);
+    if (post_.count(key) == 1) {
+        return post_.find(key)->second;
+    }
+    return "";
 }

@@ -82,21 +82,61 @@ public:
 
     ~HttpRequest() = default;
 
+    /**
+     * initiate variables
+    */
     void init();
 
+    /**
+     * parse an HTTP request from a given buffer. it reads from the buffer and parse differnent parts
+     * of the HTTP request: the request line, headers, and body
+     * @param buffer contains the raw HTTP request data to be parsed
+     * @return whether the parse successed
+    */
     bool parse(Buffer &buffer);
 
+    /**
+     * get the path
+     * @return path
+    */
     std::string path() const;
     
+    /**
+     * get the path
+     * @return path
+    */
     std::string &path();
 
+    /**
+     * get the method
+     * @return method
+    */
     std::string method() const;
 
+    /**
+     * get the version
+     * @return version
+    */
     std::string version() const;
 
+    /**
+     * get the post of a specific key
+     * @param key a key used to find target post
+     * @return post of the key
+    */
     std::string get_post(const std::string &key) const;
+
+    /**
+     * get the post of a specific key
+     * @param key a key used to find target post
+     * @return post of the key
+    */
     std::string get_post(const char *key) const;
 
+    /**
+     * check if the header contains information to keep alive after request
+     * @return whether keep alive after
+    */
     bool is_keep_alive() const;
 
 private:
