@@ -1,3 +1,50 @@
+/**
+ * An HTTP response is the message a server sends back to a client afterreceiving and processing
+ * an HTTP request. The structure of an HTTP response is also standardized and consists of
+ * several parts (three parts here: status line, headers and body), each serving a specific
+ * function.
+ *   1. Status Line:
+ *       HTTP Version: specifies the version of the HTTP protocal being used, such as 'HTTP/1.1'
+ *       Status Code: A three digit number that indicates the result of the request. 
+ *
+ *       Example: HTTP/1.1 200 OK
+ *
+ *   2. Headers:
+ *       Content-Type: indicates the media type of the resource sent to the client, such as
+ *                     'text/html', 'application/json', or 'image/jpeg'
+ *       Content-Length: indicates the size of the response body in bytes
+ *       Connection: whether or not the connection should be kept alive after this response
+ *  
+ *       Example: Content-type: text/html
+ *                Content-length: 128
+ *                Connection: keep-alive
+ *
+ *   3. Body: the actual content of the response to be sent to the client. This could be an HTML
+ *            page, JSON data, an image, or any other type of data, depending on the request and
+ *            response headers.
+ *       Example:    <html>
+ *                   <head>
+ *                       <title>Example Page</title>
+ *                   </head>
+ *                   <body>
+ *                       <hi>Hello, World!</hi>
+ *                   </body>
+ *                   </heml>
+ * 
+ *   4. Example of a Full HTTP Response:
+ *       +-------------+-----------------+-------------------+
+ *       | Status Line | Headers         | Body              |
+ *       +-------------+-----------------+-------------------+
+ *       | HTTP/1.1 200 OK               | Content of file   |
+ *       | Content-Type: text/html       | or error message  |
+ *       | Content-Length: 123           |                   |
+ *       | Connection: keep-alive        |                   |
+ *       +-------------------------------+-------------------+
+ *
+ *       
+*/
+
+
 #ifndef HTTP_RESPONSE_H_
 #define HTTP_RESPONSE_H_
 
