@@ -183,3 +183,13 @@ bool HttpRequest::user_verify(const std::string &name, const std::string &pwd, b
     LOG_DEBUG("User Verify Success!");
     return flag;
 }
+
+int HttpRequest::conver_hex(char ch) {
+    if (ch >= 'A' && ch <= 'F') {
+        return ch - 'A' + 10;
+    }
+    if (ch >= 'a' && ch <= 'f') {
+        return ch - 'a' + 10;
+    }
+    return ch;
+}

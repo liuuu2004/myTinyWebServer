@@ -141,6 +141,11 @@ private:
     */
     static bool user_verify(const std::string &name, const std::string &pwd, bool is_login);
 
+    /**
+     * convert hex-number to dec-number
+     * @param ch character to be converted
+     * @return decimal number
+    */
     static int conver_hex(char ch);
 
 private:
