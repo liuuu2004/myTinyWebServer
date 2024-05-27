@@ -30,3 +30,7 @@ const char * HttpConn::get_ip() const {
 bool HttpConn::is_keep_alive() const {
     return request_.is_keep_alive();
 }
+
+int HttpConn::to_write_bytes() const {
+    return iov_[0].iov_len + iov_[1].iov_len;
+}

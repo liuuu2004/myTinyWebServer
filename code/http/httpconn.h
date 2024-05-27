@@ -50,6 +50,10 @@ public:
 
     bool process();
 
+    /**
+     * return the total number of bytes that are pending to be written to the sockert
+     * @return the total number of bytes that are pending to be written to the sockert
+    */
     int to_write_bytes() const;
     
     /**
