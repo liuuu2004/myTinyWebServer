@@ -55,13 +55,34 @@ public:
 private:
     /**
      * parse a request line of an HTTP request
+     * @param line a line to be parsed
     */
     bool parse_request_line(const std::string &line);
+
+    /**
+     * parse a request header of a HTTP request
+     * @param line a line to be parsed
+    */
     void parse_header(const std::string &line);
+
+    /**
+     * parse a request body of a HTTP request
+     * @param line a line to be parsed
+    */
     void parse_body(const std::string &line);
 
+    /**
+     * parse a request path of a HTTP request
+    */
     void parse_path();
+    /**
+     * parse a POST HTTP request data when the Content-type is a specific string
+    */
     void parse_post();
+
+    /**
+     * parse the body of a POST request that is encoded as a specific type
+    */
     void parse_from_urlencoded();
 
     static bool user_verify(const std::string &name, const std::string &pwd, bool is_login);
