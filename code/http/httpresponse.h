@@ -41,7 +41,11 @@
  *       | Connection: keep-alive        |                   |
  *       +-------------------------------+-------------------+
  *
- *       
+ *    5. What does mm_file_ and mm_file_stat_ used for?
+ *        in this project, data are stored in two spaces: Database and server-memory. The requested
+ *        data will be mapped into memory (marked as mm_file_), and its metadata is stored in
+ *        mm_file_stat_. This allows efficient file cintent access without loading the entire file
+ *        into memory.
 */
 
 
