@@ -1,3 +1,37 @@
+/**
+ * The Buffer class is designed to handle dynamic resizing and management of conditious block of
+ * memory. This is useful in network programming where you ned to read and write data effieicntly
+ *
+ * The Buffer class manages a resizable array (vector) of characters, it maintains three main
+ * poniters/positions, they are:
+ *   1. read_pos_: The position in the buffer where the next read operation will start.
+ *   2. write_pos_: The position in the buffer where the next write operation wil start.
+ *   3. buffer_: The underlying storage (vector of characters)
+ * 
+ * Buffer Layout:
+ * 
+ *      +-------------------+-------------------+------------------+
+ *      |    Prependable    |      Readable     |     Writable     |
+ *      |      Bytes        |       Bytes       |      Bytes       |
+ *      +-------------------+-------------------+------------------+
+ *      |                   |                   |                  |
+ *      0 <-- BeginPtr()   read_pos_          write_pos_         end
+ *
+ *
+ *     a buffer underlying vector is divided into three parts:
+ *       1. Prependable Byets: Bytes before read position, which can be used to prepending data.
+ *       2. Readable Bytes: Bytes between read_pos_ and write_pos_, which are data that has been
+ *                          written but not yet read.
+ *       3. Writable Bytes: Bytes from write_pos_ to the end of the bufferm availiable for
+ *                          writing new data.
+ *    
+ *     When its requried to makespace, this Buffer will call function MakeSpace(), this will move
+ *     move the read_pos_ to the begining position of the underlying vector and move all the data
+ *     to hide the Prependable Bytes so the space of Prependable Bytes can be colleced to makespace.
+*/   
+
+
+
 #ifndef BUFFER_H
 #define BUFFER_H
 
