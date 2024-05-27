@@ -1,3 +1,48 @@
+/**
+ * An HTTP Request is s message sent by a client to a server, requesting a resource or servce.
+ * The structure of an HTTP request is standardized and consists of serveral parts, each serving
+ * a specific purpose. (three parts here: status line, headers and body), each serving a specific
+ * function.
+ *   1. Status Line:
+ *       HTTP method, requested resource (path) and HTTP version
+ *
+ *       Example:  Get /index.heml HTTP/1.1
+ *
+ *   2. Headers:
+ *       Contain various metadata for the request.
+ *
+ *       Example:
+ *         Host: www.example.com
+ *         Connection: keep-alive
+ *         Accept: text/html
+ *         User-Agent: Mozilla/5.0
+ *         Content-Length: 27
+ *         Content-Type: application/x-www-form-urlencoded
+ *
+ *   3. Body:
+ *       Contain the actual data sent with the request, typically for POST requests
+ *
+ *       Example:  username=JohnDoe&password=123456
+ *
+ *  Example of HTTP Response Message:
+ *      +-------------+-----------------------------------+-------------------+
+ *      | Request Line| Headers                           | Body              |
+ *      +-------------+-----------------------------------+-------------------+
+ *      | GET /index.html HTTP/1.1                        | User data         |
+ *      | Host: www.example.com                           | or form data      |
+ *      | Connection: keep-alive                          |                   |
+ *      | Accept: text/html                               |                   |
+ *      | User-Agent: Mozilla/5.0                         |                   |
+ *      | Content-Length: 27                              |                   |
+ *      | Content-Type: application/x-www-form-urlencoded |                   |
+ *      +-------------------------------------------------+-------------------+
+ *
+ *
+*/
+
+
+
+
 #ifndef HTTP_REQUEST_H_
 #define HTTP_REQUEST_H_
 
@@ -6,8 +51,10 @@
 #include <unordered_set>
 #include <regex>
 
+#include "mysql/mysql.h"
 #include "../buffer/buffer.h"
 #include "../log/log.h"
+#include "../pool/sqlconnRAII.h"
 
 class HttpRequest {
 public:
@@ -84,7 +131,14 @@ private:
      * parse the body of a POST request that is encoded as a specific type
     */
     void parse_from_urlencoded();
-
+    /**
+     * verify a user's credentials against a MYSQL database. The method can handle both login
+     * and registration scenarios
+     * @param name name of the user
+     * @param pwd password of the user
+     * @param is_login whether the user is login or registration
+     * @return 
+    */
     static bool user_verify(const std::string &name, const std::string &pwd, bool is_login);
 
     static int conver_hex(char ch);
