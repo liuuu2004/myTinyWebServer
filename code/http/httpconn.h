@@ -1,5 +1,16 @@
 /**
- * 
+ * 1. what is iovec
+ *     1. the iovec structure is used in low level IO operations in Unix-like operating systems.
+ *        it's part of the scatter-gather IO mechanism, which allows a program to perform input
+ *        and output operations on non-contiguous memory buffers. this is particularly useful
+ *        for optimizing performance when dealing with complex data structures that arenot
+ *        stored in a single contiguous memory block.
+ *
+ *     2. the iovec structure:
+ *         struct iovec { void *iov_base; size_t iov_len; };
+ *         iov_base: a pointer to the start of the buffer
+ *         iov_len: the length of the buffer in bytes
+ *
 */
 
 
