@@ -15,11 +15,26 @@ class HttpConn {
 public:
     HttpConn();
     ~HttpConn();
-
+    
+    /**
+     * init variables and clear containers
+     * @param sock_fd socket file descriptor
+     * @param addr address of TODO
+    */
     void init(int sock_fd, const sockaddr_in &addr);
 
+    /**
+     * read data from socket into the read_buffer_ buffer
+     * @param save_error pointer to an integer where the function stores the error number
+     *                   if an error occurs
+    */
     ssize_t read(int *save_error);
 
+    /**
+     * write data from the write_buffer_ buffer to the socket
+     * @param save_error pointer to an integer where the function stores the error number
+     *                   if an error occurs
+    */
     ssize_t write(int *save_error);
 
     void close();
