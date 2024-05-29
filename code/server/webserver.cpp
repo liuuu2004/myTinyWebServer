@@ -32,7 +32,25 @@ WebServer::WebServer(int port, int trig_mode, int timeout_ms, bool opt_linger, i
             LOG_INFO("Listen Mode: %s, OpenConn Mode: %s",
                 (listen_event_ & EPOLLET ? "ET" : "LT"),
                 (conn_event_ & EPOLLET ? "ET" : "LT"));
-            
+            LOG_INFO("LogSys level: %d", log_level);
+            LOG_INFO("srcDir: %s", HttpConn::src_dir);
+            LOG_INFO("SqlConnPool num: %d, ThreadPool num: %d", conn_pool_num, thread_num);
         }
     }
+}
+
+WebServer::~WebServer() {
+    close(listen_fd_);
+    is_close_ = true;
+    free(src_dir_);
+    SqlConnPool::instance()->close_pool();
+}
+
+void WebServer::send_error(int fd, const char *info) {
+    assert(fd > 0);
+    int ret = send(fd, info, strlen(info), 0);
+    if (ret < 0) {
+        LOG_WARN("send error to client [%d] error!", fd);
+    }
+    close(fd);
 }

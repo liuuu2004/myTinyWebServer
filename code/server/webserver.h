@@ -28,6 +28,11 @@ private:
     void deal_write(HttpConn *client);
     void deal_read(HttpConn *client);
 
+    /**
+     * send an error message to the client and close the connection
+     * @param fd file describer of the client
+     * @param info information to be sent
+    */
     void send_error(int fd, const char *info);
     void extent_time(HttpConn *client);
     void close_conn(HttpConn *client);
