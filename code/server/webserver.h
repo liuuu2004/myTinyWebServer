@@ -40,19 +40,74 @@ private:
     static int set_fd_nonblock(int fd);
 
 private:
+    /**
+     * the port number on which the web server will listen for incoming connections
+    */
     int port_;
+
+    /**
+     * a flag indicates whether the socket option SO_LINGER is enabled. this option 
+     * determines the behavior of the socket when it's closed, specially whether it will
+     * linger to send remaining data
+    */
     bool open_linger_;
+
+    /**
+     * the timeout of waiting in ms
+    */
     int timeout_ms_;
+
+    /**
+     * whether the server is currently closed
+    */
     bool is_close_;
+
+    /**
+     * the file descriptor for the listening socket, the socket is used to accept
+     * incoming connections
+    */
     int listen_fd_;
+
+    /**
+     * a pointer to a character array holding the directory path for server resources,
+     * this dictionary contains static files that may be served by the web server
+    */
     char *src_dir_;
 
+    /**
+     * event configuration for the lsitening socket, this holds the events that the epoll
+     * instance will monitor for the listening socket
+    */
     uint32_t listen_event_;
+
+    /**
+     * event configuration for the client connection sockets, this holds the events
+     * that the epoll instance will monitor for each client socket
+    */
     uint32_t conn_event_;
 
+    /**
+     * manage time-based events, such as connection timeouts
+    */
     std::unique_ptr<HeapTimer> timer_;
+
+    /**
+     * manage a collection of threads that handle client requests, allowing the server
+     * to process mutiple requests concurrently
+    */
     std::unique_ptr<ThreadPool> thread_pool_;
+
+    /**
+     * encapsulates the epoll functionally, managing the file descriptors and events
+     * for the server
+    */
     std::unique_ptr<Epoller> epoller_;
+
+    /**
+     * maps client socket file descriptors to HttpConn instances, stores the state and data
+     * for each connected client, enabling the server to manage multiple client connections
+     * efficiently
+    */
     std::unordered_map<int, HttpConn> users_;
 };
 
