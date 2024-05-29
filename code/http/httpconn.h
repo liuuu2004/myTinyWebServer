@@ -1,3 +1,8 @@
+/**
+ * 
+*/
+
+
 #ifndef HTTP_CONN_H_
 #define HTTP_CONN_H_
 
@@ -37,6 +42,9 @@ public:
     */
     ssize_t write(int *save_error);
 
+    /**
+     * close connection and free resources
+    */
     void close();
 
     /**
@@ -63,6 +71,13 @@ public:
     */
     sockaddr_in get_addr() const;
 
+    /**
+     * managing the parsing of an HTTP request and thepreparation of the corresponding HTTP
+     * response. It handles reading from the input buffer, parsing the retuest, generating the
+     * response, and setting up the IO vectors for effecient writing. The function ensures that
+     * the resposne is properly formatted and ready to be sent back to the client.
+     * @return true if the resposne is ready to be sent
+    */
     bool process();
 
     /**

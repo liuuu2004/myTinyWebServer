@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <netinet/in.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 HttpConn::HttpConn() {
     fd_ = -1;
@@ -86,4 +87,60 @@ ssize_t HttpConn::write(int *save_error) {
         }
     } while (is_ET || to_write_bytes() > 10240);
     return len;
+}
+
+void HttpConn::close() {
+    response_.unmap_file();
+    if (is_close_ == false) {
+        is_close_ = true;
+        user_cnt--;
+        ::close(fd_);
+        LOG_INFO("Client[%d](%s:%s) quit, UserCount:%d", fd_, get_ip(), get_port(), (int) user_cnt);
+    }
+}
+
+bool HttpConn::process() {
+    // initialize the request object to reset its state for a new request
+    request_.init();
+
+    // check if there are any readable bytes in the read buffer
+    if (read_buffer_.ReadableBytes() <= 0) {
+        // if no readable bytes, return false indicating no request to process
+        return false;
+    } else if (request_.parse(read_buffer_)) {
+        // if the request is successfully parsed, log the request path
+        LOG_DEBUG("%s", request_.path().c_str());
+
+        /**
+         * initialize the response object with the source directory, retuest path,
+         * keep-alive flag and a 200 OK status code
+        */
+        response_.init(src_dir, request_.path(), request_.is_keep_alive(), 200);
+    } else {
+        /** if the request parsing failed, initialize the response object with a 400
+         *  bad request status code
+        */
+        response_.init(src_dir, request_.path(), false, 400);
+    }
+
+    // generate the HTTP response and store it in the write buffer
+    response_.make_response(write_buffer_);
+
+    // set up the iovec structure for the response headers
+    iov_[0].iov_base = const_cast<char *>(write_buffer_.Peek());
+    iov_[0].iov_len = write_buffer_.ReadableBytes();
+    iov_cnt_ = 1;
+
+    // check if there is a file to be sent as part of the response
+    if (response_.file_len() > 0 && response_.file()) {
+        // if there is a file, set up the iovec structure for the file
+        iov_[1].iov_base = response_.file();
+        iov_[1].iov_len = response_.file_len();
+        iov_cnt_ = 2;
+    }
+
+    // log the file size, the number of iovec structures, and the total bytes to be written
+    LOG_DEBUG("filesize:%d, %d  to %d", response_.file_len(), iov_cnt_, to_write_bytes());
+
+    return true;
 }
