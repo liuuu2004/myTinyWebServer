@@ -64,6 +64,10 @@ private:
      * @param info information to be sent
     */
     void send_error(int fd, const char *info);
+
+    /**
+     * 
+    */
     void extent_time(HttpConn *client);
 
     /**
@@ -91,6 +95,12 @@ private:
     void on_process(HttpConn *client);
 
     static const int MAX_FD_ = 65535;
+
+    /**
+     * sets a file descriptor to non-blocking mode
+     * @param fd file descriptor to be set
+     * @return whether successed
+    */
     static int set_fd_nonblock(int fd);
 
 private:

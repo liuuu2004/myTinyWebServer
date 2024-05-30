@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cerrno>
 #include <cstring>
+#include <fcntl.h>
 #include <functional>
 #include <iterator>
 #include <netinet/in.h>
@@ -239,4 +240,9 @@ bool WebServer::init_socket() {
     set_fd_nonblock(listen_fd_);
     LOG_INFO("Server Port:%d", port_);
     return true;
+}
+
+int WebServer::set_fd_nonblock(int fd) {
+    assert(fd > 0);
+    return fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 }
