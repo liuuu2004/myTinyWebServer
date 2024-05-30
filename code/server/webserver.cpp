@@ -144,3 +144,34 @@ void WebServer::on_process(HttpConn *client) {
         epoller_->mod_fd(client->get_fd(), conn_event_ | EPOLLIN);
     }
 }
+
+void WebServer::start() {
+    int time_ms = -1;
+    if (!is_close_) {
+        LOG_INFO("======== Server Start ========");
+    }
+    while (!is_close_) {
+        if (timeout_ms_ > 0) {
+            time_ms = timer_->GetNextTick();
+        }
+        int event_cnt = epoller_->wait(time_ms);
+        for (int i = 0; i < event_cnt; i++) {
+            int fd = epoller_->get_event_fd(i);
+            uint32_t events = epoller_->get_events(i);
+            if (fd == listen_fd_) {
+                deal_listen();
+            } else if (events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)) {
+                assert(users_.count(fd) > 0);
+                close_conn(&users_[fd]);
+            } else if (events & EPOLLIN) {
+                assert(users_.count(fd) > 0);
+                deal_read(&users_[fd]);
+            } else if (events & EPOLLOUT) {
+                assert(users_.count(fd) > 0);
+                deal_write(&users_[fd]);
+            } else {
+                LOG_ERROR("Unexpected Event!");
+            }
+        }
+    }
+}

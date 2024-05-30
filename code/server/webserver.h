@@ -20,7 +20,6 @@ public:
 
     /**
      * start the event-loop and waits for every using epoll_wait and handles them accordingly
-     * TODO
     */
     void start();
     
