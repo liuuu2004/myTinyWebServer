@@ -1,7 +1,9 @@
 #include "webserver.h"
 #include "epoller.h"
 #include <cassert>
+#include <cerrno>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <netinet/in.h>
 #include <sys/epoll.h>
@@ -69,7 +71,7 @@ void WebServer::add_client(int fd, sockaddr_in addr) {
     assert(fd > 0);
     users_[fd].init(fd, addr);
     if (timeout_ms_ > 0) {
-        timer_->add(fd, timeout_ms_, std::bind(&::WebServer::close_conn, this, &users_[fd]));
+        timer_->add(fd, timeout_ms_, std::bind(&WebServer::close_conn, this, &users_[fd]));
     }
     epoller_->add_fd(fd, EPOLLIN | conn_event_);
     set_fd_nonblock(fd);
@@ -90,4 +92,55 @@ void WebServer::deal_listen() {
         }
         add_client(fd, addr);
     } while (listen_event_ & EPOLLET);
+}
+
+void WebServer::deal_read(HttpConn *client) {
+    assert(client != nullptr);
+    extent_time(client);
+    thread_pool_->AddTask(std::bind(&WebServer::on_read, this, client));
+}
+
+void WebServer::deal_write(HttpConn *client) {
+    assert(client != nullptr);
+    extent_time(client);
+    thread_pool_->AddTask(std::bind(&WebServer::on_write, this, client));
+}
+
+void WebServer::on_read(HttpConn *client) {
+    assert(client);
+    int ret = -1;
+    int read_errno = 0;
+    ret = client->read(&read_errno);
+    if (ret <= 0 && read_errno != EAGAIN) {
+        close_conn(client);
+        return;
+    }
+    on_process(client);
+}
+
+void WebServer::on_write(HttpConn *client) {
+    assert(client != nullptr);
+    int ret = -1;
+    int write_errno = 0;
+    ret = client->write(&write_errno);
+    if (client->to_write_bytes() == 0) {
+        if (client->is_keep_alive()) {
+            on_process(client);
+            return;
+        }
+    } else if (ret < 0) {
+        if (write_errno == EAGAIN) {
+            epoller_->mod_fd(client->get_fd(), conn_event_ != EPOLLOUT);
+            return;
+        }
+    }
+    close_conn(client);
+}
+
+void WebServer::on_process(HttpConn *client) {
+    if (client->process()) {
+        epoller_->mod_fd(client->get_fd(), conn_event_ | EPOLLOUT); 
+    } else {
+        epoller_->mod_fd(client->get_fd(), conn_event_ | EPOLLIN);
+    }
 }

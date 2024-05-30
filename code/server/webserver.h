@@ -39,7 +39,18 @@ private:
      * accepts nre connections and adds them as clients
     */
     void deal_listen();
+    
+    /**
+     * handles write events similarly to read events
+     * @param client client connection to be dealt with
+    */
     void deal_write(HttpConn *client);
+
+    /**
+     * handles read events by extending the connection's timeout and adding a read task
+     * to the thread pool
+     * @param client client connection to be dealt with
+    */
     void deal_read(HttpConn *client);
 
     /**
@@ -56,8 +67,22 @@ private:
     */
     void close_conn(HttpConn *client);
 
+    /**
+     * reads data from the client and process it
+     * @param client client connection to read data from
+    */
     void on_read(HttpConn *client);
+
+    /**
+     * write data to the client and handle any errors
+     * @param client client connection to write data to
+    */
     void on_write(HttpConn *client);
+
+    /**
+     * process the client's request and updates the epoll instance accordingly
+     * @param client client connection to be processed
+    */
     void on_process(HttpConn *client);
 
     static const int MAX_FD_ = 65535;
