@@ -1,0 +1,20 @@
+# Ignore build directories
+/build
+/CMakeFiles
+/CMakeCache.txt
+/cmake_install.cmake
+/Makefile
+/*.o
+/*.obj
+
+#Ignore Visual Studio Code specific files
+.vscode/
+
+# Ignore other temporary files
+*.log
+*.tmp
+*.swp
+*.bak
+*.dSYM
+*.DS_Store
+*.zip
