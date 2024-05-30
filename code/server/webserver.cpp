@@ -1,5 +1,6 @@
 #include "webserver.h"
 #include "epoller.h"
+#include <asm-generic/socket.h>
 #include <cassert>
 #include <cerrno>
 #include <cstring>
@@ -174,4 +175,68 @@ void WebServer::start() {
             }
         }
     }
+}
+
+bool WebServer::init_socket() {
+    int ret;
+    struct sockaddr_in addr;
+    if (port_ > 65535 || port_ < 1024) {
+        LOG_ERROR("Port:%d erorr!", port_);
+        return false;
+    }
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons(port_);
+    struct linger opt_linger = {0};
+    if (open_linger_) {
+        opt_linger.l_onoff = 1;
+        opt_linger.l_linger = 1;
+    }
+
+    listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (listen_fd_ < 0) {
+        LOG_ERROR("Create socket error!", port_);
+        return false;
+    }
+
+    ret = setsockopt(listen_fd_, SOL_SOCKET, SO_LINGER, &opt_linger, sizeof(opt_linger));
+    if (ret == -1) {
+        close(listen_fd_);
+        LOG_ERROR("Init linger error!", port_);
+        return false;
+    }
+
+    int optval = 1;
+
+    ret = setsockopt(listen_fd_, SOL_SOCKET, SO_REUSEADDR, (const void *) &optval, sizeof(int));
+    if (ret == -1) {
+        close(listen_fd_);
+        LOG_ERROR("set socket setsockopt erorr!", port_);
+        return false;
+    }
+
+    ret = bind(listen_fd_, (struct sockaddr *) &addr, sizeof(addr));
+    if (ret < 0) {
+        close(listen_fd_);
+        LOG_ERROR("Bind Port:%d error!", port_);
+        return false;
+    }
+
+    ret = listen(listen_fd_, 6);
+    if (ret < 0) {
+        close(listen_fd_);
+        LOG_ERROR("Listen Port:%d error!", port_);
+        return false;
+    }
+
+    ret = epoller_->add_fd(listen_fd_, listen_event_ | EPOLLIN);
+    if (ret == 0) {
+        close(listen_fd_);
+        LOG_ERROR("Add listen error");
+        return false;
+    }
+    set_fd_nonblock(listen_fd_);
+    LOG_INFO("Server Port:%d", port_);
+    return true;
 }

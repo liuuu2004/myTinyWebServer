@@ -24,6 +24,12 @@ public:
     void start();
     
 private:
+    /**
+     * initialize the lsitening socket and configures socket options binds the socket to
+     * the specified port and starts listening for incoming connections. adds the listening socket
+     * to the epoll instance and sets it to non-blocking mode
+     * @return true if init successed, otherwise false
+    */
     bool init_socket();
     void init_event_mode(int trig_mode);
 
