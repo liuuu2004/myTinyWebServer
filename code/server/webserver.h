@@ -31,6 +31,11 @@ private:
      * @return true if init successed, otherwise false
     */
     bool init_socket();
+
+    /**
+     * configures the event handling mode for the server based on the provided trig_mode
+     * @param trig_mode determins how events are detected and procesed by the epoll instance
+    */
     void init_event_mode(int trig_mode);
 
     /**
@@ -66,7 +71,8 @@ private:
     void send_error(int fd, const char *info);
 
     /**
-     * 
+     * extend the timeout duration for a client's connection
+     * @param client client connection whose timeout duration is to be extended
     */
     void extent_time(HttpConn *client);
 

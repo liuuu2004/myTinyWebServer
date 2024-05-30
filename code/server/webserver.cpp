@@ -246,3 +246,34 @@ int WebServer::set_fd_nonblock(int fd) {
     assert(fd > 0);
     return fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 }
+
+void WebServer::extent_time(HttpConn *client) {
+    assert(client != nullptr);
+    if (timeout_ms_ > 0) {
+        timer_->adjust(client->get_fd(), timeout_ms_);
+    }
+}
+
+void WebServer::init_event_mode(int trig_mode) {
+    listen_event_ = EPOLLRDHUP;
+    conn_event_ = EPOLLONESHOT | EPOLLRDHUP;
+    switch (trig_mode) {
+        case 0:
+            break;
+        case 1:
+            conn_event_ |= EPOLLET;
+            break;
+        case 2:
+            listen_event_ |= EPOLLET;
+            break;
+        case 3:
+            listen_event_ |= EPOLLET;
+            conn_event_ |= EPOLLET;
+            break;
+        default:
+            listen_event_ |= EPOLLET;
+            conn_event_ |= EPOLLET;
+            break;
+    }
+    HttpConn::is_ET = (conn_event_ & EPOLLET);
+}
