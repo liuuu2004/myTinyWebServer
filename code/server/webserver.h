@@ -17,13 +17,27 @@ public:
               const char *sql_user, const char *sql_pwd, const char *db_name,
               int conn_pool_num, int thread_num, bool open_log, int log_level, int log_que_size);
     ~WebServer();
+
+    /**
+     * start the event-loop and waits for every using epoll_wait and handles them accordingly
+     * TODO
+    */
     void start();
     
 private:
     bool init_socket();
     void init_event_mode(int trig_mode);
+
+    /**
+     * add a new client connexction and set it up with the epoll instance
+     * @param fd file descriptor to be added
+     * @param addr client address
+    */
     void add_client(int fd, sockaddr_in addr);
 
+    /**
+     * accepts nre connections and adds them as clients
+    */
     void deal_listen();
     void deal_write(HttpConn *client);
     void deal_read(HttpConn *client);
@@ -35,6 +49,11 @@ private:
     */
     void send_error(int fd, const char *info);
     void extent_time(HttpConn *client);
+
+    /**
+     * close a client connection and removes it from the epoll instance
+     * @param client client connection to be closed
+    */
     void close_conn(HttpConn *client);
 
     void on_read(HttpConn *client);

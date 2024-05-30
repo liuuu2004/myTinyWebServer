@@ -2,7 +2,10 @@
 #include "epoller.h"
 #include <cassert>
 #include <cstring>
+#include <iterator>
+#include <netinet/in.h>
 #include <sys/epoll.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 WebServer::WebServer(int port, int trig_mode, int timeout_ms, bool opt_linger, int sql_port,
@@ -53,4 +56,38 @@ void WebServer::send_error(int fd, const char *info) {
         LOG_WARN("send error to client [%d] error!", fd);
     }
     close(fd);
+}
+
+void WebServer::close_conn(HttpConn *client) {
+    assert(client != nullptr);
+    LOG_INFO("Client[%d] quit!", client->get_fd());
+    epoller_->del_fd(client->get_fd());
+    client->close();
+}
+
+void WebServer::add_client(int fd, sockaddr_in addr) {
+    assert(fd > 0);
+    users_[fd].init(fd, addr);
+    if (timeout_ms_ > 0) {
+        timer_->add(fd, timeout_ms_, std::bind(&::WebServer::close_conn, this, &users_[fd]));
+    }
+    epoller_->add_fd(fd, EPOLLIN | conn_event_);
+    set_fd_nonblock(fd);
+    LOG_INFO("Client[%d] in!", users_[fd].get_fd());
+}
+
+void WebServer::deal_listen() {
+    struct sockaddr_in addr;
+    socklen_t len = sizeof(addr);
+    do {
+        int fd = accept(listen_fd_, (struct sockaddr *) &addr, &len);
+        if (fd < 0) {
+            return;
+        } else if (HttpConn::user_cnt >= MAX_FD_) {
+            send_error(fd, "server busy");
+            LOG_WARN("Clients are full");
+            return;
+        }
+        add_client(fd, addr);
+    } while (listen_event_ & EPOLLET);
 }
