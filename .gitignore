@@ -10,6 +10,9 @@
 #Ignore Visual Studio Code specific files
 .vscode/
 
+# Ignore index files
+*.idx
+
 # Ignore other temporary files
 *.log
 *.tmp
